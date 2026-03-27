@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Brawl Tracker</title>
+</head>
+<body>
+    <h1>🎮 Brawl Tracker</h1>
+
+    <input type="text" id="tag" placeholder="#PLAYER_TAG">
+    <button onclick="buscar()">Buscar</button>
+
+    <pre id="resultado"></pre>
+
+    <script>
+        async function buscar() {
+            const tag = document.getElementById("tag").value;
+
+            const res = await fetch("https://TU_BACKEND/player/" + tag);
+            const data = await res.json();
+
+            document.getElementById("resultado").textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
