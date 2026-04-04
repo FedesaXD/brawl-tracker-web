@@ -1,17 +1,7 @@
 const API = "https://matuclub-api.onrender.com";
 
-/* ─── BRAWLER & ASSET IMAGE MAPS ────────────────────── */
+/* ─── BRAWLER IMAGE MAP ──────────────────────────────── */
 var BRAWLER_IMGS = {};
-var GAME_ICONS = {
-  trophy:      "https://cdn.brawlify.com/rank/Silver_III.png",
-  prestige:    "https://cdn.brawlify.com/rank/Gold_I.png",
-  wins3v3:     "https://cdn.brawlify.com/gamemode/gemGrab.png",
-  winsSolo:    "https://cdn.brawlify.com/gamemode/soloShowdown.png",
-  gadget:      null,
-  starpower:   null,
-  hypercharge: "https://cdn.brawlify.com/rank/Legendary_I.png",
-  winstreak:   "https://cdn.brawlify.com/rank/Diamond_I.png"
-};
 
 function loadBrawlerImages() {
   fetch("https://api.brawlapi.com/v1/brawlers")
@@ -21,25 +11,29 @@ function loadBrawlerImages() {
       data.list.forEach(function(b) {
         BRAWLER_IMGS[b.name.toUpperCase()] = b.imageUrl2 || b.imageUrl;
       });
-      var withGadget = data.list.filter(function(b) { return b.gadgets && b.gadgets.length > 0; })[0];
-      if (withGadget && withGadget.gadgets[0].imageUrl)
-        GAME_ICONS.gadget = withGadget.gadgets[0].imageUrl;
-      var withStar = data.list.filter(function(b) { return b.starPowers && b.starPowers.length > 0; })[0];
-      if (withStar && withStar.starPowers[0].imageUrl)
-        GAME_ICONS.starpower = withStar.starPowers[0].imageUrl;
     })
-    .catch(function(e) { console.warn("No se pudieron cargar imágenes:", e); });
+    .catch(function(e) { console.warn("No se pudieron cargar imágenes de brawlers:", e); });
 }
 
 function getBrawlerImg(name) {
   return BRAWLER_IMGS[name] || null;
 }
 
-// Genera icono del juego — sin onerror inline, usa un elemento real
-function gameIcon(key, alt, fallback) {
-  var url = GAME_ICONS[key];
-  if (!url) return '<span class="stat-icon-emoji">' + fallback + '</span>';
-  return '<img src="' + url + '" class="stat-icon-img" alt="' + alt + '">';
+/* ─── ICONOS SVG INLINE (sin requests externas) ──────── */
+// Todos los iconos son SVG puros, sin depender de CDNs
+var ICONS = {
+  trophy: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 3h12v7a6 6 0 01-12 0V3z" fill="#ffd700" stroke="#e6b800" stroke-width="1"/><path d="M3 5h3v4a3 3 0 01-3-3V5zM21 5h-3v4a3 3 0 003-3V5z" fill="#ffd700" stroke="#e6b800" stroke-width="1"/><rect x="9" y="16" width="6" height="2" rx="1" fill="#ffd700"/><rect x="7" y="18" width="10" height="2" rx="1" fill="#e6b800"/></svg>',
+  prestige: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="#00d4ff" stroke="#0099cc" stroke-width="1"/></svg>',
+  wins3v3: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="3" fill="#00aaff"/><circle cx="16" cy="8" r="3" fill="#00aaff"/><circle cx="12" cy="6" r="3" fill="#0066ff"/><path d="M2 20c0-4 3-6 6-6h8c3 0 6 2 6 6" stroke="#00aaff" stroke-width="2" fill="none"/></svg>',
+  winsSolo: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="7" r="4" fill="#aa55ff"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#aa55ff" stroke-width="2" fill="none"/></svg>',
+  winstreak: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2c0 0 4 5 4 10a4 4 0 01-8 0c0-2 1-4 1-4s-3 2-3 6a7 7 0 0014 0c0-7-8-12-8-12z" fill="#ff6600" stroke="#cc4400" stroke-width="0.5"/><path d="M12 10c0 0 2 2 2 4a2 2 0 01-4 0c0-1 0.5-2 0.5-2s-1 1-1 3a2.5 2.5 0 005 0c0-3-2.5-5-2.5-5z" fill="#ffcc00"/></svg>',
+  gadget: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="3" width="8" height="14" rx="2" fill="#8855ff" stroke="#6633cc" stroke-width="1"/><rect x="10" y="17" width="4" height="4" rx="1" fill="#6633cc"/><circle cx="12" cy="10" r="2" fill="#ccaaff"/></svg>',
+  starpower: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="12,3 14,9 20,9 15.5,13 17,19 12,16 7,19 8.5,13 4,9 10,9" fill="#ffcc00" stroke="#ff9900" stroke-width="1"/></svg>',
+  hypercharge: '<svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="13,2 13,10 20,10 11,22 11,14 4,14" fill="#00ff99" stroke="#00cc77" stroke-width="1"/></svg>'
+};
+
+function icon(key) {
+  return ICONS[key] || "";
 }
 
 /* ─── UTILS ──────────────────────────────────────────── */
@@ -61,7 +55,6 @@ function goToPlayer(tag) {
 }
 
 /* ─── EVENT DELEGATION para filas clickeables ────────── */
-// En vez de onclick inline, usamos data-tag y delegación de eventos
 document.addEventListener("click", function(e) {
   var row = e.target.closest("tr[data-tag]");
   if (row) {
@@ -71,19 +64,23 @@ document.addEventListener("click", function(e) {
 });
 
 /* ─── TOP PRESTIGE ───────────────────────────────────── */
+var prestigeLoaded = false;
+
 function fetchPrestige() {
+  if (prestigeLoaded) return; // no recargar si ya hay datos
   var container = document.getElementById("prestigeList");
   container.innerHTML = '<div class="loading">Cargando ranking</div>';
   fetch(API + "/top/prestige")
     .then(function(res) { return res.json(); })
     .then(function(data) {
+      prestigeLoaded = true;
       var rows = data.map(function(p) {
         var dataTag = p.tag ? ' data-tag="' + p.tag + '"' : "";
         var cursor  = p.tag ? ' style="cursor:pointer"' : "";
         return '<tr class="clickable-row"' + dataTag + cursor + '>'
           + '<td>' + p.rank + '</td>'
           + '<td>' + p.name + '</td>'
-          + '<td>' + fmt(p.prestige) + '</td>'
+          + '<td>' + icon("trophy") + fmt(p.prestige) + '</td>'
           + '</tr>';
       }).join("");
       container.innerHTML = '<div class="table-wrap">'
@@ -95,7 +92,9 @@ function fetchPrestige() {
       container.innerHTML = '<div class="loading">Error al cargar datos</div>';
     });
 }
-document.getElementById("prestige").addEventListener("click", fetchPrestige);
+
+// Cargar prestige cuando se entra a esa vista por primera vez
+document.querySelector('[onclick="showView(\'prestige\')"]').addEventListener("click", fetchPrestige);
 
 /* ─── PLAYER ─────────────────────────────────────────── */
 var chart;
@@ -122,7 +121,6 @@ function fetchPlayer() {
         return;
       }
 
-      // ── Profile card ────────────────────────────────
       profileEl.innerHTML =
         '<div class="profile-card">'
         + '<div class="profile-top">'
@@ -132,27 +130,26 @@ function fetchPlayer() {
         +   '</div>'
         +   '<div class="winstreak-badge">'
         +     '<div class="ws-label">Mejor racha</div>'
-        +     '<div class="ws-val">' + gameIcon("winstreak","racha","🔥") + ' ' + data.best_winstreak.value + '</div>'
+        +     '<div class="ws-val">' + icon("winstreak") + ' ' + data.best_winstreak.value + '</div>'
         +     '<div class="ws-brawler">' + data.best_winstreak.brawler + '</div>'
         +   '</div>'
         + '</div>'
         + '<div class="stats-grid">'
         +   '<div class="stat-box"><div class="stat-label">Trofeos máximos</div>'
-        +     '<div class="stat-val">' + gameIcon("trophy","trofeos","🏆") + fmt(data.highest_trophies) + '</div></div>'
+        +     '<div class="stat-val">' + icon("trophy") + fmt(data.highest_trophies) + '</div></div>'
         +   '<div class="stat-box"><div class="stat-label">Prestige total</div>'
-        +     '<div class="stat-val">' + gameIcon("prestige","prestige","✨") + fmt(data.total_prestige) + '</div></div>'
+        +     '<div class="stat-val">' + icon("prestige") + fmt(data.total_prestige) + '</div></div>'
         +   '<div class="stat-box"><div class="stat-label">Victorias 3v3</div>'
-        +     '<div class="stat-val">' + gameIcon("wins3v3","3v3","🎮") + fmt(data.wins3v3) + '</div></div>'
+        +     '<div class="stat-val">' + icon("wins3v3") + fmt(data.wins3v3) + '</div></div>'
         +   '<div class="stat-box"><div class="stat-label">Victorias Solo</div>'
-        +     '<div class="stat-val">' + gameIcon("winsSolo","solo","⚔️") + fmt(data.winsSolo) + '</div></div>'
+        +     '<div class="stat-val">' + icon("winsSolo") + fmt(data.winsSolo) + '</div></div>'
         + '</div></div>';
 
-      // ── History chart ────────────────────────────────
       if (data.history && data.history.length > 1) {
         historyData = {
           labels:      data.history.map(function(h) {
-            var d = new Date(h[0]);
-            var mm = String(d.getMinutes()).length < 2 ? "0" + d.getMinutes() : String(d.getMinutes());
+            var d  = new Date(h[0]);
+            var mm = d.getMinutes() < 10 ? "0" + d.getMinutes() : "" + d.getMinutes();
             return d.getDate() + "/" + (d.getMonth()+1) + " " + d.getHours() + ":" + mm;
           }),
           trophies:    data.history.map(function(h) { return h[1]; }),
@@ -167,7 +164,6 @@ function fetchPlayer() {
         renderChart("trophies");
       }
 
-      // ── Brawler grid ─────────────────────────────────
       if (data.top_brawlers && data.top_brawlers.length > 0) {
         brawlersSec.style.display = "block";
         var grid = document.getElementById("brawlerGrid");
@@ -187,21 +183,18 @@ function fetchPlayer() {
           var placeholderDisplay = imgUrl ? "none" : "flex";
 
           var gadgetPill = gadgets > 0
-            ? '<span class="attr-pill attr-gadget">' + gameIcon("gadget","gadget","⚙️") + " " + gadgets + '</span>'
-            : "";
+            ? '<span class="attr-pill attr-gadget">' + icon("gadget") + " " + gadgets + '</span>' : "";
           var starPill = stars > 0
-            ? '<span class="attr-pill attr-star">' + gameIcon("starpower","star power","⭐") + " " + stars + '</span>'
-            : "";
+            ? '<span class="attr-pill attr-star">' + icon("starpower") + " " + stars + '</span>' : "";
           var hyperPill = hyper > 0
-            ? '<span class="attr-pill attr-hyper">' + gameIcon("hypercharge","hypercharge","⚡") + " HC</span>"
-            : "";
+            ? '<span class="attr-pill attr-hyper">' + icon("hypercharge") + " HC</span>" : "";
 
           return '<div class="brawler-card">'
             + '<div class="brawler-img-wrap">'
             +   imgHtml
             +   '<div class="brawler-img-placeholder" style="display:' + placeholderDisplay + '">' + displayName + '</div>'
             +   '<div class="brawler-power">P' + power + '</div>'
-            +   '<div class="brawler-trophies">' + gameIcon("trophy","trofeos","🏆") + ' ' + fmt(trophies) + '</div>'
+            +   '<div class="brawler-trophies">' + icon("trophy") + ' ' + fmt(trophies) + '</div>'
             + '</div>'
             + '<div class="brawler-info">'
             +   '<div class="brawler-name">' + displayName + '</div>'
@@ -305,7 +298,7 @@ function fetchBrawler() {
         return '<tr class="clickable-row"' + dataTag + cursor + '>'
           + '<td>' + p.rank + '</td>'
           + '<td>' + p.name + '</td>'
-          + '<td>' + fmt(p.trophies) + '</td>'
+          + '<td>' + icon("trophy") + fmt(p.trophies) + '</td>'
           + '</tr>';
       }).join("");
       container.innerHTML = '<div class="table-wrap">'
