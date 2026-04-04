@@ -605,3 +605,98 @@ tbody tr:nth-child(3) td:first-child { color: #cd7f32; }
   .search-btn { width: 100%; }
   .profile-top { flex-direction: column; }
 }
+
+/* ─── PUNTO 1: AVATAR DEL JUGADOR ────────────────────── */
+.player-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--border-glow);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+.player-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ─── PUNTO 2: NOMBRE Y TAG DEL CLUB ────────────────── */
+.profile-club-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.profile-club-tag {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+/* ─── PUNTO 4: SKELETON LOADERS ──────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  display: block;
+}
+.skel-sm  { width: 60px;  height: 14px; }
+.skel-md  { width: 120px; height: 18px; }
+.skel-lg  { width: 180px; height: 26px; }
+.skel-avatar { width: 56px; height: 56px; border-radius: var(--radius-sm); flex-shrink: 0; }
+
+.skeleton-wrap td { vertical-align: middle; }
+
+/* ─── PUNTO 5: AUTOCOMPLETE DROPDOWN ────────────────── */
+.search-bar-wrap {
+  position: relative;
+  margin-bottom: 24px;
+}
+.search-bar-wrap .search-bar {
+  margin-bottom: 0;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: fadeUp 0.15s ease;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+  transition: background 0.12s;
+  border-bottom: 1px solid var(--border);
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover {
+  background: var(--surface-3);
+  color: var(--accent);
+}
