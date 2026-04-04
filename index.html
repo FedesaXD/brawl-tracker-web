@@ -166,9 +166,12 @@
       </h2>
     </header>
     <div class="content-area">
-      <div class="search-bar">
-        <input id="brawlerName" placeholder="Nombre del brawler…" />
-        <button class="search-btn" onclick="fetchBrawler()">Buscar</button>
+      <div class="search-bar-wrap">
+        <div class="search-bar">
+          <input id="brawlerName" placeholder="Nombre del brawleru2026" autocomplete="off" />
+          <button class="search-btn" onclick="fetchBrawler()">Buscar</button>
+        </div>
+        <div id="brawlerDropdown" class="autocomplete-dropdown" style="display:none"></div>
       </div>
       <div id="brawlerList"></div>
     </div>
