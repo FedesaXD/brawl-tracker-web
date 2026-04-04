@@ -5,21 +5,29 @@ var BRAWLER_IMGS = {};
 var BRAWLER_LIST = [];
 
 function loadBrawlerImages() {
-  fetch("https://api.brawlapi.com/v1/brawlers")
+  fetch("https://api.brawlify.com/v1/brawlers")
     .then(function(res) { return res.json(); })
     .then(function(data) {
       if (!data.list) return;
       data.list.forEach(function(b) {
-        BRAWLER_IMGS[b.name.toUpperCase()] = b.imageUrl2 || b.imageUrl;
-        BRAWLER_LIST.push({ name: b.name, img: b.imageUrl2 || b.imageUrl });
+        var img = b.imageUrl2 || b.imageUrl || null;
+        BRAWLER_IMGS[b.name.toUpperCase()] = img;
+        BRAWLER_LIST.push({ name: b.name, img: img });
       });
       BRAWLER_LIST.sort(function(a, b) { return a.name.localeCompare(b.name); });
     })
-    .catch(function(e) { console.warn("No se pudieron cargar imágenes:", e); });
+    .catch(function() {
+      console.warn("No se pudo cargar lista de brawlers");
+    });
+}
+
+function buildBrawlerImgUrl(name) {
+  var slug = name.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "");
+  return "https://cdn.brawlify.com/brawlers/borderless/" + slug + ".png";
 }
 
 function getBrawlerImg(name) {
-  return BRAWLER_IMGS[name.toUpperCase()] || null;
+  return BRAWLER_IMGS[name.toUpperCase()] || buildBrawlerImgUrl(name);
 }
 
 function getPlayerIconUrl(iconId) {
