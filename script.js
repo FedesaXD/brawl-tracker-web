@@ -89,7 +89,7 @@ function renderSkeleton(rows, type) {
       +   "<div class='stat-box'><div class='skel skel-sm' style='margin-bottom:8px'></div><div class='skel skel-md'></div></div>"
       + "</div></div>";
   }
-  return "<div class='loading'>Cargando…</div>";
+  return "<div class='loading'>Cargando...</div>";
 }
 
 /* ─── TOP PRESTIGE ───────────────────────────────────── */
