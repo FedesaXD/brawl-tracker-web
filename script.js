@@ -1,8 +1,18 @@
-const API = "https://matuclub-api.onrender.com";
+const API = "https://thereafter-matthew-closure-grass.trycloudflare.com";
 
-/* ─── BRAWLER IMAGE MAP ──────────────────────────────── */
-// Se carga una vez desde BrawlAPI y mapea NOMBRE_MAYUSCULAS -> imageUrl
+/* ─── BRAWLER & ASSET IMAGE MAPS ────────────────────── */
 let BRAWLER_IMGS = {};
+// Iconos del juego desde BrawlAPI
+const GAME_ICONS = {
+  trophy:     "https://cdn.brawlify.com/rank/Silver_III.png",
+  prestige:   "https://cdn.brawlify.com/rank/Gold_I.png",
+  wins3v3:    "https://cdn.brawlify.com/gamemode/gemGrab.png",
+  winsSolo:   "https://cdn.brawlify.com/gamemode/soloShowdown.png",
+  gadget:     null,  // se llena desde BrawlAPI
+  starpower:  null,  // se llena desde BrawlAPI
+  hypercharge:"https://cdn.brawlify.com/rank/Legendary_I.png",
+  winstreak:  "https://cdn.brawlify.com/rank/Diamond_I.png",
+};
 
 async function loadBrawlerImages() {
   try {
@@ -10,9 +20,15 @@ async function loadBrawlerImages() {
     const data = await res.json();
     if (data.list) {
       data.list.forEach(b => {
-        // b.name puede ser "El Primo", guardamos en mayúsculas como clave
         BRAWLER_IMGS[b.name.toUpperCase()] = b.imageUrl2 || b.imageUrl;
       });
+      // Tomar icono de gadget y starpower del primer brawler que los tenga
+      const withGadget = data.list.find(b => b.gadgets && b.gadgets.length > 0);
+      if (withGadget && withGadget.gadgets[0].imageUrl)
+        GAME_ICONS.gadget = withGadget.gadgets[0].imageUrl;
+      const withStar = data.list.find(b => b.starPowers && b.starPowers.length > 0);
+      if (withStar && withStar.starPowers[0].imageUrl)
+        GAME_ICONS.starpower = withStar.starPowers[0].imageUrl;
     }
   } catch(e) {
     console.warn("No se pudieron cargar imágenes de brawlers:", e);
@@ -20,8 +36,15 @@ async function loadBrawlerImages() {
 }
 
 function getBrawlerImg(name) {
-  // name viene en MAYUSCULAS desde la DB
   return BRAWLER_IMGS[name] || null;
+}
+
+// Genera un <img> con fallback a texto
+function gameIcon(key, label, fallbackEmoji) {
+  const url = GAME_ICONS[key];
+  if (!url) return `<span class="stat-icon-emoji">${fallbackEmoji}</span>`;
+  return `<img src="${url}" class="stat-icon-img" alt="${label}"
+               onerror="this.outerHTML='<span class=\'stat-icon-emoji\'>${fallbackEmoji}</span>'"/>`;
 }
 
 /* ─── UTILS ──────────────────────────────────────────── */
@@ -110,26 +133,26 @@ async function fetchPlayer() {
           </div>
           <div class="winstreak-badge">
             <div class="ws-label">Mejor racha</div>
-            <div class="ws-val">🔥 ${data.best_winstreak.value}</div>
+            <div class="ws-val">${gameIcon('winstreak','racha','🔥')} ${data.best_winstreak.value}</div>
             <div class="ws-brawler">${data.best_winstreak.brawler}</div>
           </div>
         </div>
         <div class="stats-grid">
           <div class="stat-box">
             <div class="stat-label">Trofeos máximos</div>
-            <div class="stat-val"><span class="stat-icon">🏆</span>${fmt(data.highest_trophies)}</div>
+            <div class="stat-val">${gameIcon('trophy','trofeos','🏆')}${fmt(data.highest_trophies)}</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">Prestige total</div>
-            <div class="stat-val"><span class="stat-icon">✨</span>${fmt(data.total_prestige)}</div>
+            <div class="stat-val">${gameIcon('prestige','prestige','✨')}${fmt(data.total_prestige)}</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">Victorias 3v3</div>
-            <div class="stat-val"><span class="stat-icon">🎮</span>${fmt(data.wins3v3)}</div>
+            <div class="stat-val">${gameIcon('wins3v3','3v3','🎮')}${fmt(data.wins3v3)}</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">Victorias Solo</div>
-            <div class="stat-val"><span class="stat-icon">⚔️</span>${fmt(data.winsSolo)}</div>
+            <div class="stat-val">${gameIcon('winsSolo','solo','⚔️')}${fmt(data.winsSolo)}</div>
           </div>
         </div>
       </div>`;
@@ -166,9 +189,9 @@ async function fetchPlayer() {
           : "";
         const placeholderStyle = imgUrl ? "display:none" : "display:flex";
 
-        const gadgetPills = gadgets > 0 ? `<span class="attr-pill attr-gadget">⚙️ ${gadgets}</span>` : "";
-        const starPills   = stars > 0   ? `<span class="attr-pill attr-star">⭐ ${stars}</span>`    : "";
-        const hyperPills  = hyper > 0   ? `<span class="attr-pill attr-hyper">⚡ HC</span>`          : "";
+        const gadgetPills = gadgets > 0 ? `<span class="attr-pill attr-gadget">${gameIcon('gadget','gadget','⚙️')} ${gadgets}</span>` : "";
+        const starPills   = stars > 0   ? `<span class="attr-pill attr-star">${gameIcon('starpower','star power','⭐')} ${stars}</span>`    : "";
+        const hyperPills  = hyper > 0   ? `<span class="attr-pill attr-hyper">${gameIcon('hypercharge','hypercharge','⚡')} HC</span>`          : "";
 
         return `
           <div class="brawler-card">
@@ -176,7 +199,7 @@ async function fetchPlayer() {
               ${imgTag}
               <div class="brawler-img-placeholder" style="${placeholderStyle}">${displayName}</div>
               <div class="brawler-power">P${power}</div>
-              <div class="brawler-trophies">🏆 ${fmt(trophies)}</div>
+              <div class="brawler-trophies">${gameIcon('trophy','trofeos','🏆')} ${fmt(trophies)}</div>
             </div>
             <div class="brawler-info">
               <div class="brawler-name">${displayName}</div>
