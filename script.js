@@ -161,16 +161,22 @@ function fetchPlayer() {
       }
 
       var iconUrl    = data.icon_url || null;
-      var avatarHtml = iconUrl
-        ? "<img src='" + iconUrl + "' alt='avatar' class='player-avatar' crossorigin='anonymous'"
-          + " onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\">"
-          + "<div class='player-avatar-placeholder' style='display:none'></div>"
-        : "<div class='player-avatar-placeholder'></div>";
-
       var clubDisplay = data.club_name
         ? "<span class='profile-club-name'>" + data.club_name + "</span>"
           + (data.club_tag ? " <span class='profile-club-tag'>" + data.club_tag + "</span>" : "")
         : (data.club_tag || "Sin club");
+
+      var prestigeBadge =
+        "<div class='prestige-badge'>"
+        + "<img src='totalprestige.webp' class='prestige-badge-img' alt='prestige'/>"
+        + "<span class='prestige-badge-num'>" + fmt(data.total_prestige) + "</span>"
+        + "</div>";
+
+      var avatarHtml = iconUrl
+        ? "<img src='" + iconUrl + "' alt='avatar' class='player-avatar'"
+          + " onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\">"
+          + "<div class='player-avatar-placeholder' style='display:none'></div>"
+        : "<div class='player-avatar-placeholder'></div>";
 
       profileEl.innerHTML =
         "<div class='profile-card'>"
@@ -182,17 +188,18 @@ function fetchPlayer() {
         +       "<div class='profile-club'>" + clubDisplay + "</div>"
         +     "</div>"
         +   "</div>"
-        +   "<div class='winstreak-badge'>"
-        +     "<div class='ws-label'>Mejor racha</div>"
-        +     "<div class='ws-val'>" + icon("winstreak") + " " + data.best_winstreak.value + "</div>"
-        +     "<div class='ws-brawler'>" + data.best_winstreak.brawler + "</div>"
-        +   "</div>"
+        +   prestigeBadge
         + "</div>"
         + "<div class='stats-grid'>"
-        +   "<div class='stat-box'><div class='stat-label'>Trofeos máximos</div><div class='stat-val'>" + icon("trophy") + fmt(data.highest_trophies) + "</div></div>"
-        +   "<div class='stat-box'><div class='stat-label'>Prestige total</div><div class='stat-val'>" + icon("prestige") + fmt(data.total_prestige) + "</div></div>"
-        +   "<div class='stat-box'><div class='stat-label'>Victorias 3v3</div><div class='stat-val'>" + icon("wins3v3") + fmt(data.wins3v3) + "</div></div>"
-        +   "<div class='stat-box'><div class='stat-label'>Victorias Solo</div><div class='stat-val'>" + icon("winsSolo") + fmt(data.winsSolo) + "</div></div>"
+        +   "<div class='stat-box'><div class='stat-label'>Trofeos maximos</div>"
+        +     "<div class='stat-val stat-val-img'><img src='trophy.webp' class='stat-asset-img'>" + fmt(data.highest_trophies) + "</div></div>"
+        +   "<div class='stat-box'><div class='stat-label'>Mejor racha</div>"
+        +     "<div class='stat-val stat-ws-val'><span class='ws-fire'>&#x1F525;</span><span class='ws-number'>" + data.best_winstreak.value + "</span></div>"
+        +     "<div class='stat-ws-brawler'>" + data.best_winstreak.brawler + "</div></div>"
+        +   "<div class='stat-box'><div class='stat-label'>Victorias 3v3</div>"
+        +     "<div class='stat-val stat-val-img'><img src='3v3.webp' class='stat-asset-img'>" + fmt(data.wins3v3) + "</div></div>"
+        +   "<div class='stat-box'><div class='stat-label'>Victorias Solo</div>"
+        +     "<div class='stat-val stat-val-img'><img src='showdown.webp' class='stat-asset-img'>" + fmt(data.winsSolo) + "</div></div>"
         + "</div></div>";
 
       if (data.history && data.history.length > 1) {
@@ -221,19 +228,32 @@ function fetchPlayer() {
           var imgUrl      = getBrawlerImg(bName);
           var imgHtml     = imgUrl ? "<img src='" + imgUrl + "' alt='" + displayName + "' class='brawler-main-img'>" : "";
           var phDisplay   = imgUrl ? "none" : "flex";
-          var gPill = gadgets > 0 ? "<span class='attr-pill attr-gadget'>" + icon("gadget") + " " + gadgets + "</span>" : "";
-          var sPill = stars   > 0 ? "<span class='attr-pill attr-star'>"   + icon("starpower") + " " + stars + "</span>" : "";
-          var hPill = hyper   > 0 ? "<span class='attr-pill attr-hyper'>"  + icon("hypercharge") + " HC</span>" : "";
+          // Iconos repetidos segun cantidad
+          var gIcons = "";
+          for (var gi = 0; gi < gadgets; gi++) gIcons += "<img src='gadget.png' class='attr-icon-img'>";
+          var sIcons = "";
+          for (var si = 0; si < stars; si++) sIcons += "<img src='starpower.webp' class='attr-icon-img'>";
+          var hIcons = "";
+          for (var hi = 0; hi < hyper; hi++) hIcons += "<img src='hipercharge.webp' class='attr-icon-img attr-icon-hc'>";
+
           return "<div class='brawler-card'>"
             + "<div class='brawler-img-wrap'>"
             +   imgHtml
             +   "<div class='brawler-img-placeholder' style='display:" + phDisplay + "'>" + displayName + "</div>"
-            +   "<div class='brawler-power'>P" + power + "</div>"
-            +   "<div class='brawler-trophies'>" + icon("trophy") + " " + fmt(trophies) + "</div>"
+            // Power level: icono con numero encima
+            +   "<div class='brawler-power-wrap'>"
+            +     "<img src='powerlevel.webp' class='brawler-power-img'>"
+            +     "<span class='brawler-power-num'>" + power + "</span>"
+            +   "</div>"
+            // Trofeos con icono real
+            +   "<div class='brawler-trophies'>"
+            +     "<img src='trophy.webp' class='trophy-icon-img'>"
+            +     "<span>" + fmt(trophies) + "</span>"
+            +   "</div>"
             + "</div>"
             + "<div class='brawler-info'>"
             +   "<div class='brawler-name'>" + displayName + "</div>"
-            +   "<div class='brawler-attrs'>" + gPill + sPill + hPill + "</div>"
+            +   "<div class='brawler-attrs'>" + gIcons + sIcons + hIcons + "</div>"
             + "</div></div>";
         }).join("");
       }
