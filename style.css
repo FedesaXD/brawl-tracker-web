@@ -848,7 +848,7 @@ tbody tr:nth-child(3) td:first-child { color: #cd7f32; }
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
-.player-tab {
+.player-tab, .top-tab {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-xs);
@@ -861,8 +861,8 @@ tbody tr:nth-child(3) td:first-child { color: #cd7f32; }
   transition: all 0.2s;
   white-space: nowrap;
 }
-.player-tab:hover { color: var(--text); border-color: var(--border-glow); }
-.player-tab.active {
+.player-tab:hover, .top-tab:hover { color: var(--text); border-color: var(--border-glow); }
+.player-tab.active, .top-tab.active {
   background: var(--accent-dim);
   border-color: rgba(0,212,255,0.35);
   color: var(--accent);
