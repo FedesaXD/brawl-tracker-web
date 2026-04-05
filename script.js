@@ -107,273 +107,51 @@ function renderSkeleton(rows, type) {
   return "<div class='loading'>Cargando...</div>";
 }
 
-/* ─── TOP PRESTIGE ───────────────────────────────────── */
-var prestigeCache = { data: null, ts: 0 };
-var PRESTIGE_TTL  = 5 * 60 * 1000;
+/* ─── TOP JUGADORES ─────────────────────────────────── */
+var topCache = {};
 
-function fetchPrestige() {
-  var now = Date.now();
-  if (prestigeCache.data && (now - prestigeCache.ts) < PRESTIGE_TTL) {
-    renderPrestige(prestigeCache.data);
-    return;
-  }
-  document.getElementById("prestigeList").innerHTML = renderSkeleton(8, "table");
-  fetch(API + "/top/prestige")
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      prestigeCache = { data: data, ts: Date.now() };
-      renderPrestige(data);
-    })
-    .catch(function() {
-      document.getElementById("prestigeList").innerHTML = "<div class='loading'>Error al cargar datos</div>";
-    });
-}
-
-function renderPrestige(data) {
-  var rows = data.map(function(p) {
-    var attrs = p.tag ? " data-tag='" + p.tag + "' style='cursor:pointer'" : "";
-    return "<tr class='clickable-row'" + attrs + ">"
-      + "<td>" + p.rank + "</td>"
-      + "<td>" + p.name + "</td>"
-      + "<td>" + icon("trophy") + fmt(p.prestige) + "</td>"
-      + "</tr>";
-  }).join("");
-  document.getElementById("prestigeList").innerHTML =
-    "<div class='table-wrap'>"
-    + "<p class='table-hint'>Toca un jugador para ver su perfil</p>"
-    + "<table><thead><tr><th>#</th><th>Jugador</th><th>Prestige</th></tr></thead>"
-    + "<tbody>" + rows + "</tbody></table></div>";
-}
-
-/* ─── PLAYER ─────────────────────────────────────────── */
-var chart;
-var historyData = {};
-
-function fetchPlayer() {
-  var tag = document.getElementById("playerTag").value.trim();
-  if (!tag) return;
-  if (tag[0] !== "#") tag = "#" + tag;
-  fetchPlayerByTag(tag);
-}
-
-function fetchPlayerByTag(tag) {
-  if (!tag) return;
-  if (tag[0] !== "#") tag = "#" + tag;
-  console.log("fetchPlayerByTag llamado con:", tag);
-
-  var profileEl   = document.getElementById("playerProfile");
-  console.log("profileEl:", profileEl, "innerHTML antes:", profileEl ? profileEl.innerHTML.slice(0,50) : "NULL");
-  var chartSec    = document.getElementById("chartSection");
-  var brawlersSec = document.getElementById("brawlersSection");
-
-  profileEl.innerHTML = renderSkeleton(0, "profile");
-  chartSec.style.display    = "none";
-  brawlersSec.style.display = "none";
-
-  fetch(API + "/player/" + encodeURIComponent(tag))
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (data.error) {
-        profileEl.innerHTML = "<div class='loading'>Jugador no encontrado</div>";
-        return;
-      }
-
-      var iconUrl    = data.icon_url || null;
-      var clubDisplay = data.club_name
-        ? "<span class='profile-club-name'>" + data.club_name + "</span>"
-          + (data.club_tag ? " <span class='profile-club-tag'>" + data.club_tag + "</span>" : "")
-        : (data.club_tag || "Sin club");
-
-      var prestigeBadge =
-        "<div class='prestige-badge'>"
-        + "<img src='totalprestige.webp' class='prestige-badge-img' alt='prestige'/>"
-        + "<span class='prestige-badge-num'>" + fmt(data.total_prestige) + "</span>"
-        + "</div>";
-
-      var avatarHtml = iconUrl
-        ? "<img src='" + iconUrl + "' alt='avatar' class='player-avatar'"
-          + " onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\">"
-          + "<div class='player-avatar-placeholder' style='display:none'></div>"
-        : "<div class='player-avatar-placeholder'></div>";
-
-      profileEl.innerHTML =
-        "<div class='profile-card'>"
-        + "<div class='profile-top'>"
-        +   "<div style='display:flex;gap:14px;align-items:center'>"
-        +     avatarHtml
-        +     "<div>"
-        +       "<div class='profile-name'>" + data.name + "</div>"
-        +       "<div class='profile-club'>" + clubDisplay + "</div>"
-        +     "</div>"
-        +   "</div>"
-        +   prestigeBadge
-        + "</div>"
-        + "<div class='stats-grid'>"
-        +   "<div class='stat-box'><div class='stat-label'>Trofeos maximos</div>"
-        +     "<div class='stat-val stat-val-img'><img src='trophy.webp' class='stat-asset-img'>" + fmt(data.highest_trophies) + "</div></div>"
-        +   "<div class='stat-box'><div class='stat-label'>Mejor racha</div>"
-        +     "<div class='stat-val stat-ws-val'><span class='ws-fire'>&#x1F525;</span><span class='ws-number'>" + data.best_winstreak.value + "</span></div>"
-        +     "<div class='stat-ws-brawler'>" + data.best_winstreak.brawler + "</div></div>"
-        +   "<div class='stat-box'><div class='stat-label'>Victorias 3v3</div>"
-        +     "<div class='stat-val stat-val-img'><img src='3v3.webp' class='stat-asset-img'>" + fmt(data.wins3v3) + "</div></div>"
-        +   "<div class='stat-box'><div class='stat-label'>Victorias Solo</div>"
-        +     "<div class='stat-val stat-val-img'><img src='showdown.webp' class='stat-asset-img'>" + fmt(data.winsSolo) + "</div></div>"
-        + "</div></div>";
-
-      if (data.history && data.history.length > 1) {
-        historyData = {
-          labels:      data.history.map(function(h) {
-            var d = new Date(h[0]);
-            var mm = d.getMinutes() < 10 ? "0" + d.getMinutes() : "" + d.getMinutes();
-            return d.getDate() + "/" + (d.getMonth()+1) + " " + d.getHours() + ":" + mm;
-          }),
-          trophies:    data.history.map(function(h) { return h[1]; }),
-          wins3v3:     data.history.map(function(h) { return h[2]; }),
-          winsSolo:    data.history.map(function(h) { return h[3]; }),
-          prestigeLvl: data.history.map(function(h) { return h[4]; })
-        };
-        chartSec.style.display = "block";
-        document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
-        document.querySelector(".tab[data-tab='trophies']").classList.add("active");
-        renderChart("trophies");
-      }
-
-      if (data.top_brawlers && data.top_brawlers.length > 0) {
-        brawlersSec.style.display = "block";
-        document.getElementById("brawlerGrid").innerHTML = data.top_brawlers.map(function(b) {
-          var bName       = b[0], power = b[1], gadgets = b[2], stars = b[3], hyper = b[4], trophies = b[5];
-          var displayName = bName.toLowerCase().replace(/\b\w/g, function(c) { return c.toUpperCase(); });
-          var imgUrl      = getBrawlerImg(bName);
-          var imgHtml     = imgUrl ? "<img src='" + imgUrl + "' alt='" + displayName + "' class='brawler-main-img'>" : "";
-          var phDisplay   = imgUrl ? "none" : "flex";
-          // Iconos repetidos segun cantidad
-          var gIcons = "";
-          for (var gi = 0; gi < gadgets; gi++) gIcons += "<img src='gadget.png' class='attr-icon-img'>";
-          var sIcons = "";
-          for (var si = 0; si < stars; si++) sIcons += "<img src='starpower.webp' class='attr-icon-img'>";
-          var hIcons = "";
-          for (var hi = 0; hi < hyper; hi++) hIcons += "<img src='hipercharge.webp' class='attr-icon-img attr-icon-hc'>";
-
-          return "<div class='brawler-card'>"
-            + "<div class='brawler-img-wrap'>"
-            +   imgHtml
-            +   "<div class='brawler-img-placeholder' style='display:" + phDisplay + "'>" + displayName + "</div>"
-            // Power level: icono con numero encima
-            +   "<div class='brawler-power-wrap'>"
-            +     "<img src='powerlevel.webp' class='brawler-power-img'>"
-            +     "<span class='brawler-power-num'>" + power + "</span>"
-            +   "</div>"
-            // Trofeos con icono real
-            +   "<div class='brawler-trophies'>"
-            +     "<img src='trophy.webp' class='trophy-icon-img'>"
-            +     "<span>" + fmt(trophies) + "</span>"
-            +   "</div>"
-            + "</div>"
-            + "<div class='brawler-info'>"
-            +   "<div class='brawler-name'>" + displayName + "</div>"
-            +   "<div class='brawler-attrs'>" + gIcons + sIcons + hIcons + "</div>"
-            + "</div></div>";
-        }).join("");
-      }
-    })
-    .catch(function(e) {
-      document.getElementById("playerProfile").innerHTML = "<div class='loading'>Error al cargar jugador</div>";
-      console.error(e);
-    });
-}
-
-/* ─── CHART ──────────────────────────────────────────── */
-var CHART_CONFIG = {
-  trophies:    { label: "Copas",          color: "#00d4ff" },
-  wins3v3:     { label: "Victorias 3v3",  color: "#0099ff" },
-  winsSolo:    { label: "Victorias Solo", color: "#6655ff" },
-  prestigeLvl: { label: "Prestige",       color: "#00e899" }
+var TOP_CONFIG = {
+  prestige:         { label: "Prestige",        col: "Prestige",       extra: null },
+  trophies:         { label: "Trofeos",          col: "Trofeos",        extra: null },
+  wins3v3:          { label: "Victorias 3v3",    col: "Victorias",      extra: null },
+  winssolo:         { label: "Victorias Solo",   col: "Victorias",      extra: null },
+  winstreak:        { label: "Racha",            col: "Racha",          extra: "brawler" },
+  "brawler-trophies": { label: "Mejor Brawler", col: "Trofeos",        extra: "brawler" }
 };
 
-function renderChart(key) {
-  var cfg = CHART_CONFIG[key];
-  if (chart) chart.destroy();
-  Chart.defaults.color = "#4a6a85";
-  Chart.defaults.font.family = "'DM Sans', sans-serif";
-  chart = new Chart(document.getElementById("chart"), {
-    type: "line",
-    data: {
-      labels: historyData.labels,
-      datasets: [{
-        label: cfg.label,
-        data: historyData[key],
-        borderColor: cfg.color,
-        backgroundColor: hexAlpha(cfg.color, 0.08),
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: cfg.color,
-        pointBorderColor: "transparent",
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: "index", intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "#07111f",
-          borderColor: "rgba(0,160,255,0.2)",
-          borderWidth: 1,
-          titleColor: "#ddeeff",
-          bodyColor: "#4a6a85",
-          padding: 12,
-          callbacks: { label: function(ctx) { return cfg.label + ": " + fmt(ctx.parsed.y); } }
-        }
-      },
-      scales: {
-        x: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#4a6a85", maxTicksLimit: 8, maxRotation: 0 } },
-        y: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#4a6a85", callback: function(v) { return fmt(v); } } }
-      }
-    }
-  });
-}
-
-function hexAlpha(hex, alpha) {
-  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
-}
-
-/* ─── TOP BRAWLER + AUTOCOMPLETE ─────────────────────── */
-function fetchBrawler() {
-  var name      = document.getElementById("brawlerName").value.trim();
-  var container = document.getElementById("brawlerList");
-  var dropdown  = document.getElementById("brawlerDropdown");
-  if (!name) return;
-  dropdown.style.display = "none";
-  container.innerHTML = renderSkeleton(5, "table");
-
-  fetch(API + "/top/brawler/" + encodeURIComponent(name))
+function loadTop(topKey) {
+  var container = document.getElementById("topList");
+  if (topCache[topKey]) { renderTop(topKey, topCache[topKey]); return; }
+  container.innerHTML = renderSkeleton(10, "table");
+  fetch(API + "/top/" + topKey)
     .then(function(res) { return res.json(); })
     .then(function(data) {
-      if (data.error) {
-        container.innerHTML = "<div class='loading'>No hay datos para este brawler</div>";
-        return;
-      }
-      var rows = data.map(function(p) {
-        var attrs = p.tag ? " data-tag='" + p.tag + "' style='cursor:pointer'" : "";
-        return "<tr class='clickable-row'" + attrs + ">"
-          + "<td>" + p.rank + "</td>"
-          + "<td>" + p.name + "</td>"
-          + "<td>" + icon("trophy") + fmt(p.trophies) + "</td>"
-          + "</tr>";
-      }).join("");
-      container.innerHTML = "<div class='table-wrap'>"
-        + "<p class='table-hint'>Toca un jugador para ver su perfil</p>"
-        + "<table><thead><tr><th>#</th><th>Jugador</th><th>Trofeos</th></tr></thead>"
-        + "<tbody>" + rows + "</tbody></table></div>";
+      topCache[topKey] = data;
+      renderTop(topKey, data);
     })
     .catch(function() {
       container.innerHTML = "<div class='loading'>Error al cargar datos</div>";
     });
 }
 
+function renderTop(topKey, data) {
+  var cfg  = TOP_CONFIG[topKey];
+  var rows = data.map(function(p) {
+    var extra = cfg.extra && p[cfg.extra]
+      ? "<span class='top-extra'>" + p[cfg.extra] + "</span>"
+      : "";
+    return "<tr class='clickable-row' data-tag='" + p.tag + "' style='cursor:pointer'>"
+      + "<td>" + p.rank + "</td>"
+      + "<td>" + p.name + extra + "</td>"
+      + "<td>" + fmt(p.value) + "</td>"
+      + "</tr>";
+  }).join("");
+  document.getElementById("topList").innerHTML =
+    "<div class='table-wrap'>"
+    + "<p class='table-hint'>Toca un jugador para ver su perfil</p>"
+    + "<table><thead><tr><th>#</th><th>Jugador</th><th>" + cfg.col + "</th></tr></thead>"
+    + "<tbody>" + rows + "</tbody></table></div>";
+}
 
 /* ─── CLUB MEMBERS ──────────────────────────────────── */
 var clubCache = {};
@@ -424,7 +202,11 @@ document.addEventListener("DOMContentLoaded", function() {
   /* Navegación home */
   document.getElementById("btn-prestige").addEventListener("click", function() {
     showView("prestige");
-    fetchPrestige();
+    // Activar primera tab y cargar prestige
+    document.querySelectorAll(".top-tab").forEach(function(t) { t.classList.remove("active"); });
+    var t1 = document.querySelector(".top-tab[data-top='prestige']");
+    if (t1) t1.classList.add("active");
+    loadTop("prestige");
   });
   document.getElementById("btn-player").addEventListener("click", function() {
     showView("player");
@@ -470,6 +252,15 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   /* Click en filas de tabla: listener movido al scope global */
+
+  /* Tabs de top jugadores */
+  document.querySelectorAll(".top-tab").forEach(function(tab) {
+    tab.addEventListener("click", function() {
+      document.querySelectorAll(".top-tab").forEach(function(t) { t.classList.remove("active"); });
+      tab.classList.add("active");
+      loadTop(tab.getAttribute("data-top"));
+    });
+  });
 
   /* Tabs de clubs en vista jugador */
   document.querySelectorAll(".player-tab").forEach(function(tab) {
