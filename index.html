@@ -101,11 +101,31 @@
       </h2>
     </header>
     <div class="content-area">
-      <div class="search-bar">
-        <input id="playerTag" placeholder="#PLAYERTAG" />
-        <button class="search-btn" id="btn-search-player">Buscar</button>
+
+      <!-- Tabs de clubs + buscador -->
+      <div class="player-tabs-bar">
+        <button class="player-tab active" data-club="1">Matuclub 1</button>
+        <button class="player-tab" data-club="2">Matuclub 2</button>
+        <button class="player-tab" data-club="3">Matuclub 3</button>
+        <button class="player-tab" data-club="4">Matuclub 4</button>
+        <button class="player-tab" data-club="search">🔍 Buscar</button>
       </div>
-      <div id="playerProfile"></div>
+
+      <!-- Panel buscador (oculto por defecto) -->
+      <div id="panel-search" class="player-panel" style="display:none">
+        <div class="search-bar" style="margin-bottom:0">
+          <input id="playerTag" placeholder="#PLAYERTAG" />
+          <button class="search-btn" id="btn-search-player">Buscar</button>
+        </div>
+      </div>
+
+      <!-- Panel miembros del club -->
+      <div id="panel-club" class="player-panel">
+        <div id="clubMemberList"></div>
+      </div>
+
+      <!-- Perfil del jugador (siempre visible debajo) -->
+      <div id="playerProfile" style="margin-top:20px"></div>
       <div id="chartSection" style="display:none">
         <div class="section-header">
           <h3 class="section-title">Progreso</h3>
