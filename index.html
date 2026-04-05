@@ -40,8 +40,8 @@
             <span style="display:none;font-size:22px">🏆</span>
           </div>
           <div class="nav-card-body">
-            <span class="nav-card-title">Top Prestige</span>
-            <span class="nav-card-desc">Ranking del club por prestige</span>
+            <span class="nav-card-title">Top Jugadores</span>
+            <span class="nav-card-desc">Rankings del club por categoria</span>
           </div>
           <div class="nav-card-arrow">→</div>
         </button>
@@ -75,18 +75,25 @@
     </div>
   </div>
 
-  <!-- TOP PRESTIGE -->
+  <!-- TOP JUGADORES -->
   <div id="prestige" class="view">
     <header class="page-header">
       <button class="back-btn" id="btn-back-prestige"><span>←</span> Volver</button>
       <h2>
-        <img src="https://cdn.brawlify.com/rank/Silver_III.png" class="header-icon"
-             onerror="this.style.display='none'" width="28" height="28" alt=""/>
-        Top Prestige
+        <img src="trophy.webp" class="header-icon" width="28" height="28" alt=""/>
+        Top Jugadores
       </h2>
     </header>
     <div class="content-area">
-      <div id="prestigeList"><div class="loading">Cargando ranking…</div></div>
+      <div class="player-tabs-bar">
+        <button class="top-tab active" data-top="prestige">Prestige</button>
+        <button class="top-tab" data-top="trophies">Trofeos</button>
+        <button class="top-tab" data-top="wins3v3">Victorias 3v3</button>
+        <button class="top-tab" data-top="winssolo">Victorias Solo</button>
+        <button class="top-tab" data-top="winstreak">Racha</button>
+        <button class="top-tab" data-top="brawler-trophies">Mejor Brawler</button>
+      </div>
+      <div id="topList"></div>
     </div>
   </div>
 
