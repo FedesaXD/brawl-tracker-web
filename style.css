@@ -404,7 +404,7 @@ input:focus { border-color: var(--border-glow); }
 /* ─── BRAWLER GRID ────────────────────────────────────── */
 .brawler-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
   animation: fadeUp 0.3s ease;
 }
@@ -586,7 +586,7 @@ tbody tr:nth-child(3) td:first-child { color: #cd7f32; }
   .page-header { padding: 20px 18px 0; }
   .content-area { padding: 18px 18px 48px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .brawler-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .brawler-grid { grid-template-columns: repeat(2, 1fr); }
   .tab-group { flex-wrap: wrap; }
   .search-bar { flex-direction: column; }
   .search-btn { width: 100%; }
@@ -709,9 +709,9 @@ tbody tr:nth-child(3) td:first-child { color: #cd7f32; }
 .prestige-badge-num {
   position: relative;
   z-index: 1;
-  margin-top: 8px;
+  margin-top: -6px;
   font-family: var(--font-game);
-  font-size: 20px;
+  font-size: 23px;
   color: #fff;
   text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 12px rgba(80,120,255,0.6);
   text-align: center;
