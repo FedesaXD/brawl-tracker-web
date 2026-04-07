@@ -922,3 +922,188 @@ tbody tr:nth-child(3) td:first-child { color: #cd7f32; }
   text-transform: capitalize;
   margin-top: 2px;
 }
+
+/* ─── EVENTOS ────────────────────────────────────────── */
+.ev-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.3s ease;
+}
+.ev-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--muted-2), transparent);
+}
+.ev-card-active::before {
+  background: linear-gradient(90deg, #00e899, var(--accent), transparent);
+}
+
+.ev-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.ev-status {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+.ev-status-active {
+  background: rgba(0,232,153,0.12);
+  border: 1px solid rgba(0,232,153,0.3);
+  color: #00e899;
+}
+.ev-status-closed {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.ev-countdown {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 600;
+  color: #00e899;
+  letter-spacing: 0.04em;
+}
+.ev-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ev-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.ev-desc {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.ev-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,200,0,0.08);
+  border: 1px solid rgba(255,200,0,0.2);
+  border-radius: var(--radius-xs);
+  padding: 6px 14px;
+  margin-bottom: 20px;
+}
+.ev-reward-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #cc9900;
+  font-weight: 600;
+}
+.ev-reward-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffd700;
+  font-family: var(--font-head);
+}
+
+/* Podium top 3 */
+.ev-podium {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.ev-podium-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.ev-medal { font-size: 20px; flex-shrink: 0; width: 26px; text-align: center; }
+.ev-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--surface-3);
+  border: 1px solid var(--border-glow);
+}
+.ev-avatar-ph {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  flex-shrink: 0;
+}
+.ev-pname {
+  flex: 1;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ev-pdelta {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ev-pdelta.pos { color: #00e899; }
+.ev-pdelta.neg { color: #ff5555; }
+
+.ev-show-all {
+  display: block;
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 9px 16px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: 10px;
+}
+.ev-show-all:hover { color: var(--accent); border-color: var(--border-glow); }
+
+.ev-table-wrap { margin-top: 8px; animation: fadeUp 0.2s ease; }
+
+.ev-delta-pos { color: #00e899; font-family: var(--font-head); font-weight: 600; }
+.ev-delta-neg { color: #ff5555; font-family: var(--font-head); font-weight: 600; }
+
+.ev-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--muted);
+}
+.ev-empty-icon { font-size: 52px; margin-bottom: 16px; opacity: 0.4; }
+.ev-empty-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+.ev-empty-sub { font-size: 14px; color: var(--muted-2); font-weight: 300; }
