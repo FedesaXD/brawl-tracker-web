@@ -22,12 +22,13 @@
       </div>
       <h1>Matu<span>club</span></h1>
       <p class="subtitle">Página oficial de Matuclub, el mejor club de Uruguay</p>
+      <p class="subtitle-updated" id="home-last-updated" style="display:none"></p>
 
       <!-- JUGADOR DEL DÍA -->
       <div id="pod-home-card" class="pod-home-card" style="display:none">
         <div class="pod-home-label">⭐ Jugador del día</div>
         <div class="pod-home-inner">
-          <img id="pod-home-avatar" class="pod-home-avatar" src="" alt="" onerror="this.style.display='none'"/>
+          <img id="pod-home-avatar" class="pod-home-avatar" src="" alt="" onerror="this.onerror=null;this.src='';this.classList.add('pod-home-avatar-ph')"/>
           <div class="pod-home-info">
             <span id="pod-home-name" class="pod-home-name"></span>
             <span id="pod-home-club" class="pod-home-club"></span>
@@ -56,7 +57,7 @@
             <span style="display:none;font-size:22px">👤</span>
           </div>
           <div class="nav-card-body">
-            <span class="nav-card-title">👤 Jugadores</span>
+            <span class="nav-card-title">Jugadores</span>
             <span class="nav-card-desc">Stats, historial y brawlers</span>
           </div>
           <div class="nav-card-arrow">→</div>
@@ -69,7 +70,7 @@
             <span style="display:none;font-size:22px">🏆</span>
           </div>
           <div class="nav-card-body">
-            <span class="nav-card-title">🏆 Tops</span>
+            <span class="nav-card-title">Tops</span>
             <span class="nav-card-desc">Rankings del club por categoria</span>
           </div>
           <div class="nav-card-arrow">→</div>
@@ -82,7 +83,7 @@
             <span style="display:none;font-size:22px">🤖</span>
           </div>
           <div class="nav-card-body">
-            <span class="nav-card-title">🏆 Top Brawlers</span>
+            <span class="nav-card-title">Top Brawlers</span>
             <span class="nav-card-desc">Mejores jugadores por brawler</span>
           </div>
           <div class="nav-card-arrow">→</div>
@@ -92,7 +93,7 @@
             <span style="font-size:24px">📋</span>
           </div>
           <div class="nav-card-body">
-            <span class="nav-card-title">📋 Eventos</span>
+            <span class="nav-card-title">Eventos</span>
             <span class="nav-card-desc">Competencias y resultados del club</span>
           </div>
           <div class="nav-card-arrow">→</div>
@@ -225,7 +226,7 @@
       <h2><span style="font-size:22px;margin-right:6px">⭐</span>Jugador del día</h2>
     </header>
     <div class="content-area">
-      <p class="pod-desc">El jugador que más méritos acumuló cada día.<br>
+      <p class="pod-desc">El jugador que más puntos acumuló cada día.<br>
         <span class="pod-desc-pts">1 trofeo = 1pt &nbsp;·&nbsp; 1 victoria = 4pts &nbsp;·&nbsp; 1 prestige = 80pts</span>
       </p>
       <div id="podList"></div>
