@@ -83,18 +83,6 @@ function renderSkeleton(rows, type) {
 
 /* ─── TOP JUGADORES ─────────────────────────────────── */
 var topCache = {};
-var CACHE_TTL = 5 * 60 * 1000;
-
-function cacheSet(key, data) {
-  topCache[key] = { data: data, ts: Date.now() };
-}
-function cacheGet(key) {
-  var entry = topCache[key];
-  if (!entry) return null;
-  if (Date.now() - entry.ts > CACHE_TTL) { delete topCache[key]; return null; }
-  return entry.data;
-}
-
 var TOP_CONFIG = {
   "prestige":         { col: "Prestige",      extra: null },
   "trophies":         { col: "Trofeos",        extra: null },
@@ -104,29 +92,15 @@ var TOP_CONFIG = {
   "brawler-trophies": { col: "Trofeos",        extra: "brawler" }
 };
 
-function getTopSelections() {
-  var metric = (document.getElementById("top-metric-select") || {}).value || "prestige";
-  var club   = (document.getElementById("top-club-select")  || {}).value || "";
-  return { metric: metric, club: club };
-}
-
-function loadTop(topKey, club) {
+function loadTop(topKey) {
   var container = document.getElementById("topList");
   if (!container) return;
-  var cacheKey = topKey + (club ? "__" + club : "");
-  var cached = cacheGet(cacheKey);
-  if (cached) { renderTop(topKey, cached); return; }
+  if (topCache[topKey]) { renderTop(topKey, topCache[topKey]); return; }
   container.innerHTML = renderSkeleton(10, "table");
-  var url = API + "/top/" + topKey + (club ? "?club=" + club : "");
-  fetch(url)
+  fetch(API + "/top/" + topKey)
     .then(function(res) { return res.json(); })
-    .then(function(data) { cacheSet(cacheKey, data); renderTop(topKey, data); })
+    .then(function(data) { topCache[topKey] = data; renderTop(topKey, data); })
     .catch(function() { container.innerHTML = "<div class='loading'>Error al cargar datos</div>"; });
-}
-
-function loadTopFromSelects() {
-  var sel = getTopSelections();
-  loadTop(sel.metric, sel.club);
 }
 
 function renderTop(topKey, data) {
@@ -402,7 +376,14 @@ document.addEventListener("click", function(e) {
   var row = e.target.closest("tr[data-tag]");
   if (row) { goToPlayer(row.getAttribute("data-tag")); return; }
 
-  // Tabs de top jugadores — reemplazado por dropdowns, no hay listener de tabs
+  // Tabs de top jugadores
+  var topTab = e.target.closest(".top-tab");
+  if (topTab) {
+    document.querySelectorAll(".top-tab").forEach(function(t) { t.classList.remove("active"); });
+    topTab.classList.add("active");
+    loadTop(topTab.getAttribute("data-top"));
+    return;
+  }
 
   // Tabs de clubs
   var playerTab = e.target.closest(".player-tab");
@@ -431,12 +412,10 @@ document.addEventListener("DOMContentLoaded", function() {
   // Navegacion principal
   document.getElementById("btn-prestige").addEventListener("click", function() {
     showView("prestige");
-    loadTopFromSelects();
+    document.querySelectorAll(".top-tab").forEach(function(t) { t.classList.remove("active"); });
+    document.querySelector(".top-tab[data-top='prestige']").classList.add("active");
+    loadTop("prestige");
   });
-
-  // Dropdowns de top
-  document.getElementById("top-metric-select").addEventListener("change", loadTopFromSelects);
-  document.getElementById("top-club-select").addEventListener("change", loadTopFromSelects);
 
   document.getElementById("btn-player").addEventListener("click", function() {
     showView("player");
@@ -514,6 +493,7 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   loadBrawlerImages();
+  loadPlayerOfDay();
 
   // Eventos
   document.getElementById("btn-eventos").addEventListener("click", function() {
@@ -521,6 +501,13 @@ document.addEventListener("DOMContentLoaded", function() {
     loadEventos();
   });
   document.getElementById("btn-back-eventos").addEventListener("click", function() { showView("home"); });
+
+  // Jugador del día
+  document.getElementById("btn-pod-ver").addEventListener("click", function() {
+    showView("pod");
+    renderPodList();
+  });
+  document.getElementById("btn-back-pod").addEventListener("click", function() { showView("home"); });
 });
 
 /* ─── EVENTOS ────────────────────────────────────────── */
@@ -684,4 +671,86 @@ function startEventCountdown(eventId, endsAt) {
     setTimeout(tick, 1000);
   }
   tick();
+}
+
+/* ─── JUGADOR DEL DÍA ────────────────────────────────── */
+var podData = null;
+
+function loadPlayerOfDay() {
+  var card     = document.getElementById("pod-home-card");
+  var skeleton = document.getElementById("pod-home-skeleton");
+  if (!card || !skeleton) return;
+
+  skeleton.style.display = "block";
+  card.style.display     = "none";
+
+  fetch(API + "/player-of-day")
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      podData = data;
+      skeleton.style.display = "none";
+
+      var today = data.find(function(d) { return d.is_today; });
+      if (!today) return;
+
+      document.getElementById("pod-home-avatar").src = today.icon_url || "";
+      document.getElementById("pod-home-name").textContent  = today.player_name;
+      document.getElementById("pod-home-club").textContent  = today.club_name || "";
+      document.getElementById("pod-home-pts").textContent   = today.points + " puntos hoy";
+      card.style.display = "block";
+    })
+    .catch(function() {
+      skeleton.style.display = "none";
+    });
+}
+
+function renderPodList() {
+  var container = document.getElementById("podList");
+  if (!container) return;
+
+  if (!podData || podData.length === 0) {
+    container.innerHTML = "<div class='loading'>No hay datos disponibles todavía.</div>";
+    return;
+  }
+
+  var DAYS_ES = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  var MONTHS_ES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+  container.innerHTML = podData.map(function(d) {
+    var dateObj = new Date(d.day + "T00:00:00");
+    var dayName = DAYS_ES[dateObj.getDay()];
+    var dateStr = dayName.charAt(0).toUpperCase() + dayName.slice(1)
+                  + " " + dateObj.getDate()
+                  + " " + MONTHS_ES[dateObj.getMonth()];
+    var label = d.is_today ? "⭐ Hoy — " + dateStr : dateStr;
+
+    var avatar = d.icon_url
+      ? "<img class='pod-card-avatar' src='" + d.icon_url + "' onerror='this.style.display=\"none\"'>"
+      : "<div class='pod-card-avatar'></div>";
+
+    var deltas = [];
+    if (d.delta_trophies  > 0) deltas.push("🏆 +<span>" + fmt(d.delta_trophies)  + "</span> trofeos");
+    if (d.delta_wins3v3   > 0) deltas.push("🤝 +<span>" + fmt(d.delta_wins3v3)   + "</span> victorias 3v3");
+    if (d.delta_winsSolo  > 0) deltas.push("🎯 +<span>" + fmt(d.delta_winsSolo)  + "</span> victorias solo");
+    if (d.delta_prestige  > 0) deltas.push("✨ +<span>" + fmt(d.delta_prestige)  + "</span> prestige");
+
+    var deltasHtml = deltas.length
+      ? "<div class='pod-card-deltas'>" + deltas.map(function(s) {
+          return "<div class='pod-delta'>" + s + "</div>";
+        }).join("") + "</div>"
+      : "";
+
+    return "<div class='pod-card" + (d.is_today ? " pod-today" : "") + "'>"
+      + "<div class='pod-card-top'>"
+      +   avatar
+      +   "<div class='pod-card-info'>"
+      +     "<div class='pod-card-date'>" + label + "</div>"
+      +     "<div class='pod-card-name'>" + d.player_name + "</div>"
+      +     "<div class='pod-card-club'>" + (d.club_name || "") + "</div>"
+      +   "</div>"
+      +   "<div class='pod-card-pts'>" + fmt(d.points) + " pts</div>"
+      + "</div>"
+      + deltasHtml
+      + "</div>";
+  }).join("");
 }
