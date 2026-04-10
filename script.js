@@ -505,9 +505,16 @@ document.addEventListener("DOMContentLoaded", function() {
   // Jugador del día
   document.getElementById("btn-pod-ver").addEventListener("click", function() {
     showView("pod");
-    renderPodList();
+    switchPodTab("hoy");
   });
   document.getElementById("btn-back-pod").addEventListener("click", function() { showView("home"); });
+
+  // Pod tabs
+  document.querySelectorAll(".pod-tab").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      switchPodTab(btn.getAttribute("data-pod-tab"));
+    });
+  });
 });
 
 /* ─── EVENTOS ────────────────────────────────────────── */
@@ -695,8 +702,10 @@ function showLastUpdated(isoStr) {
 }
 
 /* ─── JUGADOR DEL DÍA ────────────────────────────────── */
-var podData = null;
+var podData = null;      // { last_updated, today_ranking[], history[] }
+var podActiveTab = "hoy";
 
+/* ─── JUGADOR DEL DÍA: CARGA ────────────────────────── */
 function loadPlayerOfDay() {
   var card     = document.getElementById("pod-home-card");
   var skeleton = document.getElementById("pod-home-skeleton");
@@ -711,26 +720,22 @@ function loadPlayerOfDay() {
       podData = data;
       skeleton.style.display = "none";
 
-      // Show last_updated in home if available
-      var arr = Array.isArray(data) ? data : (data.data || []);
-      var meta = !Array.isArray(data) ? data : null;
-      var updatedAt = (meta && (meta.last_updated || meta.updated_at))
-        || (arr[0] && (arr[0].last_updated || arr[0].updated_at))
-        || null;
-      showLastUpdated(updatedAt);
-      if (Array.isArray(data)) { podData = data; } else { podData = arr; }
+      // last_updated para el subtitle del home
+      showLastUpdated(data.last_updated || null);
 
-      var today = podData.find(function(d) { return d.is_today; });
-      if (!today) return;
+      // Card del home: usar el #1 del ranking de hoy
+      var ranking = data.today_ranking || [];
+      if (!ranking.length) return;
+      var top = ranking[0];
 
       var podAvatar = document.getElementById("pod-home-avatar");
       var podAvatarPh = podAvatar.nextElementSibling;
       podAvatar.style.display = "";
       if (podAvatarPh) podAvatarPh.style.display = "none";
-      podAvatar.src = today.icon_url || "";
-      document.getElementById("pod-home-name").textContent  = today.player_name;
-      document.getElementById("pod-home-club").textContent  = today.club_name || "";
-      document.getElementById("pod-home-pts").textContent   = today.points + " puntos hoy";
+      podAvatar.src = top.icon_url || "";
+      document.getElementById("pod-home-name").textContent = top.player_name;
+      document.getElementById("pod-home-club").textContent = top.club_name || "";
+      document.getElementById("pod-home-pts").textContent  = top.points + " puntos hoy";
       card.style.display = "block";
     })
     .catch(function() {
@@ -738,47 +743,128 @@ function loadPlayerOfDay() {
     });
 }
 
-function renderPodList() {
-  var container = document.getElementById("podList");
-  if (!container) return;
+/* ─── JUGADOR DEL DÍA: TABS ─────────────────────────── */
+function switchPodTab(tab) {
+  podActiveTab = tab;
+  document.querySelectorAll(".pod-tab").forEach(function(btn) {
+    btn.classList.toggle("active", btn.getAttribute("data-pod-tab") === tab);
+  });
+  document.getElementById("pod-panel-hoy").style.display      = tab === "hoy"      ? "" : "none";
+  document.getElementById("pod-panel-historial").style.display = tab === "historial" ? "" : "none";
 
-  if (!podData || podData.length === 0) {
-    container.innerHTML = "<div class='loading'>No hay datos disponibles todavía.</div>";
+  if (tab === "hoy")      renderPodHoy();
+  if (tab === "historial") renderPodHistorial();
+}
+
+/* ─── JUGADOR DEL DÍA: TAB HOY ──────────────────────── */
+function podAvatar(url, cls) {
+  cls = cls || "pod-rank-avatar";
+  return url
+    ? "<img class='" + cls + "' src='" + url + "' onerror='this.onerror=null;this.outerHTML=\"<div class=\\\"" + cls + " " + cls + "-ph\\\"></div>\"'>"
+    : "<div class='" + cls + " " + cls + "-ph'></div>";
+}
+
+function renderPodHoy() {
+  var podium  = document.getElementById("podPodium");
+  var table   = document.getElementById("podTable");
+  if (!podium || !table) return;
+
+  var ranking = podData && podData.today_ranking ? podData.today_ranking : [];
+
+  if (!ranking.length) {
+    podium.innerHTML = "<div class='loading'>Sin datos por ahora.</div>";
+    table.innerHTML  = "";
     return;
   }
 
-  var DAYS_ES = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  // ── Podio top 3 ──────────────────────────────────────
+  var medals   = ["🥇","🥈","🥉"];
+  var podOrder = [1, 0, 2]; // visual: 2º | 1º | 3º
+  var top3     = ranking.slice(0, 3);
+
+  var podiumHtml = "<div class='pod-podium'>";
+  podOrder.forEach(function(pos) {
+    var p = top3[pos];
+    if (!p) return;
+    var isFirst = pos === 0;
+    podiumHtml += "<div class='pod-podium-item" + (isFirst ? " pod-podium-first" : "") + "' data-tag='" + p.player_tag + "' style='cursor:pointer'>"
+      + "<div class='pod-podium-medal'>" + medals[pos] + "</div>"
+      + podAvatar(p.icon_url, "pod-podium-avatar")
+      + "<div class='pod-podium-name'>" + p.player_name + "</div>"
+      + "<div class='pod-podium-pts'>" + fmt(p.points) + " pts</div>"
+      + "<div class='pod-podium-club'>" + (p.club_name || "") + "</div>"
+      + "</div>";
+  });
+  podiumHtml += "</div>";
+  podium.innerHTML = podiumHtml;
+
+  // Click en podio → ir al perfil
+  podium.querySelectorAll("[data-tag]").forEach(function(el) {
+    el.addEventListener("click", function() { goToPlayer(el.getAttribute("data-tag")); });
+  });
+
+  // ── Tabla top 20 ─────────────────────────────────────
+  var tableHtml = "<div class='table-wrap'><table>"
+    + "<thead><tr><th>#</th><th>Jugador</th><th>Pts</th></tr></thead><tbody>";
+
+  ranking.forEach(function(p) {
+    tableHtml += "<tr class='clickable-row' data-tag='" + p.player_tag + "' style='cursor:pointer'>"
+      + "<td>" + p.rank + "</td>"
+      + "<td style='display:flex;align-items:center;gap:8px'>"
+      +   podAvatar(p.icon_url, "pod-row-avatar")
+      +   "<span>" + p.player_name + "</span>"
+      + "</td>"
+      + "<td style='text-align:right;font-family:var(--font-game);color:var(--accent)'>" + fmt(p.points) + "</td>"
+      + "</tr>";
+  });
+  tableHtml += "</tbody></table></div>";
+  table.innerHTML = tableHtml;
+
+  // Click en tabla → ir al perfil
+  table.querySelectorAll("tr[data-tag]").forEach(function(row) {
+    row.addEventListener("click", function() { goToPlayer(row.getAttribute("data-tag")); });
+  });
+}
+
+/* ─── JUGADOR DEL DÍA: TAB HISTORIAL ────────────────── */
+function renderPodHistorial() {
+  var container = document.getElementById("podList");
+  if (!container) return;
+
+  var history = podData && podData.history ? podData.history : [];
+
+  if (!history.length) {
+    container.innerHTML = "<div class='loading'>Sin historial disponible todavía.</div>";
+    return;
+  }
+
+  var DAYS_ES   = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
   var MONTHS_ES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
 
-  container.innerHTML = podData.map(function(d) {
+  container.innerHTML = history.map(function(d) {
     var dateObj = new Date(d.day + "T00:00:00");
     var dayName = DAYS_ES[dateObj.getDay()];
     var dateStr = dayName.charAt(0).toUpperCase() + dayName.slice(1)
                   + " " + dateObj.getDate()
                   + " " + MONTHS_ES[dateObj.getMonth()];
-    var label = d.is_today ? "⭐ Hoy — " + dateStr : dateStr;
 
-    var avatar = d.icon_url
-      ? "<img class='pod-card-avatar' src='" + d.icon_url + "' onerror='this.onerror=null;this.outerHTML=\"<div class=\\\"pod-card-avatar pod-card-avatar-ph\\\"></div>\"'>"
-      : "<div class='pod-card-avatar'></div>";
+    var av = podAvatar(d.icon_url, "pod-card-avatar");
 
     var deltas = [];
-    if (d.delta_trophies  > 0) deltas.push("🏆 +<span>" + fmt(d.delta_trophies)  + "</span> trofeos");
-    if (d.delta_wins3v3   > 0) deltas.push("🤝 +<span>" + fmt(d.delta_wins3v3)   + "</span> victorias 3v3");
-    if (d.delta_winsSolo  > 0) deltas.push("🎯 +<span>" + fmt(d.delta_winsSolo)  + "</span> victorias solo");
-    if (d.delta_prestige  > 0) deltas.push("✨ +<span>" + fmt(d.delta_prestige)  + "</span> prestige");
+    if (d.delta_trophies > 0) deltas.push("🏆 +<span>" + fmt(d.delta_trophies) + "</span> trofeos");
+    if (d.delta_wins3v3  > 0) deltas.push("🤝 +<span>" + fmt(d.delta_wins3v3)  + "</span> victorias 3v3");
+    if (d.delta_winsSolo > 0) deltas.push("🎯 +<span>" + fmt(d.delta_winsSolo) + "</span> victorias solo");
+    if (d.delta_prestige > 0) deltas.push("✨ +<span>" + fmt(d.delta_prestige) + "</span> prestige");
 
     var deltasHtml = deltas.length
-      ? "<div class='pod-card-deltas'>" + deltas.map(function(s) {
-          return "<div class='pod-delta'>" + s + "</div>";
-        }).join("") + "</div>"
+      ? "<div class='pod-card-deltas'>" + deltas.map(function(s) { return "<div class='pod-delta'>" + s + "</div>"; }).join("") + "</div>"
       : "";
 
-    return "<div class='pod-card" + (d.is_today ? " pod-today" : "") + "'>"
+    return "<div class='pod-card' data-tag='" + d.player_tag + "' style='cursor:pointer'>"
       + "<div class='pod-card-top'>"
-      +   avatar
+      +   av
       +   "<div class='pod-card-info'>"
-      +     "<div class='pod-card-date'>" + label + "</div>"
+      +     "<div class='pod-card-date'>" + dateStr + "</div>"
       +     "<div class='pod-card-name'>" + d.player_name + "</div>"
       +     "<div class='pod-card-club'>" + (d.club_name || "") + "</div>"
       +   "</div>"
@@ -787,4 +873,9 @@ function renderPodList() {
       + deltasHtml
       + "</div>";
   }).join("");
+
+  // Click en historial → ir al perfil
+  container.querySelectorAll("[data-tag]").forEach(function(el) {
+    el.addEventListener("click", function() { goToPlayer(el.getAttribute("data-tag")); });
+  });
 }
