@@ -276,6 +276,131 @@ h1 span {
 }
 .pod-delta span { color: var(--text); font-weight: 600; }
 
+/* ─── POD TABS ───────────────────────────────────────── */
+.pod-tabs-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.pod-tab {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 10px 0;
+  color: var(--muted);
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.pod-tab:hover { color: var(--text); border-color: var(--border-glow); }
+.pod-tab.active {
+  background: var(--accent-dim);
+  border-color: rgba(0,212,255,0.35);
+  color: var(--accent);
+}
+
+/* ─── POD PODIUM ─────────────────────────────────────── */
+.pod-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+.pod-podium-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 8px 12px;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+.pod-podium-item:hover { border-color: var(--border-glow); }
+.pod-podium-first {
+  background: linear-gradient(160deg, rgba(0,212,255,0.10) 0%, rgba(0,78,255,0.12) 100%);
+  border-color: rgba(0,212,255,0.3);
+  padding-top: 20px;
+  padding-bottom: 18px;
+}
+.pod-podium-medal { font-size: 26px; line-height: 1; }
+.pod-podium-first .pod-podium-medal { font-size: 32px; }
+.pod-podium-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-3);
+  flex-shrink: 0;
+  border: 2px solid var(--border-glow);
+}
+.pod-podium-first .pod-podium-avatar {
+  width: 64px;
+  height: 64px;
+  border-color: rgba(0,212,255,0.5);
+}
+.pod-podium-avatar-ph {
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: 2px solid var(--border-glow);
+}
+.pod-podium-name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.pod-podium-first .pod-podium-name { font-size: 15px; }
+.pod-podium-pts {
+  font-family: var(--font-game);
+  font-size: 16px;
+  color: var(--accent);
+}
+.pod-podium-first .pod-podium-pts { font-size: 20px; }
+.pod-podium-club {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ─── POD TABLE ROW AVATAR ───────────────────────────── */
+.pod-row-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: var(--surface-3);
+  flex-shrink: 0;
+}
+.pod-row-avatar-ph {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  background: var(--surface-3);
+  flex-shrink: 0;
+}
+
+/* ─── POD CARD clickable ─────────────────────────────── */
+.pod-card:hover { border-color: var(--border-glow); }
+
 .nav-cards { display: flex; flex-direction: column; gap: 10px; }
 
 .nav-card {
