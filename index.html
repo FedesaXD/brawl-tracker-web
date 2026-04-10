@@ -35,7 +35,7 @@
             <span id="pod-home-club" class="pod-home-club"></span>
             <span id="pod-home-pts" class="pod-home-pts"></span>
           </div>
-          <button class="pod-home-btn" id="btn-pod-ver">Ver historial →</button>
+          <button class="pod-home-btn" id="btn-pod-ver">Ver más →</button>
         </div>
       </div>
       <div id="pod-home-skeleton" class="pod-home-card pod-skeleton">
@@ -220,17 +220,36 @@
     </div>
   </div>
 
-  <!-- JUGADOR DEL DÍA - HISTORIAL -->
+    <!-- JUGADOR DEL DÍA -->
   <div id="pod" class="view">
     <header class="page-header">
       <button class="back-btn" id="btn-back-pod"><span>←</span> Volver</button>
       <h2><span style="font-size:22px;margin-right:6px">⭐</span>Jugador del día</h2>
     </header>
     <div class="content-area">
-      <p class="pod-desc">El jugador que más puntos acumuló cada día.<br>
-        <span class="pod-desc-pts">1 trofeo = 1pt &nbsp;·&nbsp; 1 victoria = 4pts &nbsp;·&nbsp; 1 prestige = 80pts</span>
-      </p>
-      <div id="podList"></div>
+
+      <!-- Tabs -->
+      <div class="pod-tabs-bar">
+        <button class="pod-tab active" data-pod-tab="hoy">Hoy</button>
+        <button class="pod-tab" data-pod-tab="historial">Historial</button>
+      </div>
+
+      <!-- Tab: Hoy -->
+      <div id="pod-panel-hoy">
+        <p class="pod-desc">
+          El jugador que más puntos acumuló hoy.<br>
+          <span class="pod-desc-pts">1 trofeo = 1pt &nbsp;·&nbsp; 1 victoria = 4pts &nbsp;·&nbsp; 1 prestige = 80pts</span>
+        </p>
+        <div id="podPodium"></div>
+        <div id="podTable"></div>
+      </div>
+
+      <!-- Tab: Historial -->
+      <div id="pod-panel-historial" style="display:none">
+        <p class="pod-desc">Ganadores de días anteriores.</p>
+        <div id="podList"></div>
+      </div>
+
     </div>
   </div>
 
