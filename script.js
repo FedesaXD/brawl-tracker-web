@@ -744,16 +744,20 @@ function loadPlayerOfDay() {
 }
 
 /* ─── JUGADOR DEL DÍA: TABS ─────────────────────────── */
+var podGanadoresData = null;  // loaded once, cached
+
 function switchPodTab(tab) {
   podActiveTab = tab;
   document.querySelectorAll(".pod-tab").forEach(function(btn) {
     btn.classList.toggle("active", btn.getAttribute("data-pod-tab") === tab);
   });
-  document.getElementById("pod-panel-hoy").style.display      = tab === "hoy"      ? "" : "none";
-  document.getElementById("pod-panel-historial").style.display = tab === "historial" ? "" : "none";
+  document.getElementById("pod-panel-hoy").style.display       = tab === "hoy"       ? "" : "none";
+  document.getElementById("pod-panel-historial").style.display  = tab === "historial"  ? "" : "none";
+  document.getElementById("pod-panel-ganadores").style.display  = tab === "ganadores"  ? "" : "none";
 
-  if (tab === "hoy")      renderPodHoy();
+  if (tab === "hoy")       renderPodHoy();
   if (tab === "historial") renderPodHistorial();
+  if (tab === "ganadores") loadPodGanadores();
 }
 
 /* ─── JUGADOR DEL DÍA: TAB HOY ──────────────────────── */
@@ -877,5 +881,59 @@ function renderPodHistorial() {
   // Click en historial → ir al perfil
   container.querySelectorAll("[data-tag]").forEach(function(el) {
     el.addEventListener("click", function() { goToPlayer(el.getAttribute("data-tag")); });
+  });
+}
+
+/* ─── JUGADOR DEL DÍA: TAB GANADORES ────────────────── */
+function loadPodGanadores() {
+  var container = document.getElementById("podGanadores");
+  if (!container) return;
+
+  // Use cached data if available
+  if (podGanadoresData) { renderPodGanadores(podGanadoresData); return; }
+
+  container.innerHTML = "<div class='loading'>Cargando...</div>";
+
+  fetch(API + "/player-of-day/winners")
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      podGanadoresData = data;
+      renderPodGanadores(data);
+    })
+    .catch(function() {
+      container.innerHTML = "<div class='loading'>Error al cargar datos.</div>";
+    });
+}
+
+function renderPodGanadores(data) {
+  var container = document.getElementById("podGanadores");
+  if (!container) return;
+
+  if (!data || !data.length) {
+    container.innerHTML = "<div class='loading'>Sin datos todavía.</div>";
+    return;
+  }
+
+  var tableHtml = "<div class='table-wrap'><table>"
+    + "<thead><tr><th>#</th><th>Jugador</th><th>Días</th></tr></thead><tbody>";
+
+  data.forEach(function(p) {
+    tableHtml += "<tr class='clickable-row' data-tag='" + p.player_tag + "' style='cursor:pointer'>"
+      + "<td>" + p.rank + "</td>"
+      + "<td style='display:flex;align-items:center;gap:8px'>"
+      +   podAvatar(p.icon_url, "pod-row-avatar")
+      +   "<span>" + p.player_name + "</span>"
+      + "</td>"
+      + "<td style='text-align:right;font-family:var(--font-game);color:var(--accent)'>"
+      +   p.wins + (p.wins === 1 ? " día" : " días")
+      + "</td>"
+      + "</tr>";
+  });
+
+  tableHtml += "</tbody></table></div>";
+  container.innerHTML = tableHtml;
+
+  container.querySelectorAll("tr[data-tag]").forEach(function(row) {
+    row.addEventListener("click", function() { goToPlayer(row.getAttribute("data-tag")); });
   });
 }
