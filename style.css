@@ -127,6 +127,74 @@ h1 span {
 
 /* ─── NAV CARDS ───────────────────────────────────────── */
 /* ─── JUGADOR DEL DÍA ────────────────────────────────── */
+/* ─── HOME LOADER ────────────────────────────────────── */
+#home-loader {
+  padding: 32px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.home-loader-msg {
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  animation: loaderPulse 2s ease-in-out infinite;
+}
+@keyframes loaderPulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+.home-loader-bar-wrap {
+  width: 100%;
+  max-width: 320px;
+  height: 5px;
+  background: var(--surface-3);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.home-loader-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue-2), var(--accent));
+  box-shadow: 0 0 10px rgba(0,212,255,0.5);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.home-loader-hint {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  opacity: 0;
+  animation: loaderHintIn 0.6s ease 2.5s forwards;
+}
+@keyframes loaderHintIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Estado oculto del loader al terminar */
+#home-loader.loader-done {
+  animation: loaderFadeOut 0.5s ease forwards;
+  pointer-events: none;
+}
+@keyframes loaderFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+
+/* Contenido principal: fade-in al aparecer */
+#home-content {
+  transition: opacity 0.5s ease 0.1s;
+}
+#home-content.content-visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  animation: fadeUp 0.4s ease;
+}
+
 .pod-home-card {
   background: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(0,78,255,0.10) 100%);
   border: 1px solid rgba(0,212,255,0.25);
