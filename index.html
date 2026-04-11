@@ -24,6 +24,18 @@
       <p class="subtitle">Página oficial de Matuclub, el mejor club de Uruguay</p>
       <p class="subtitle-updated" id="home-last-updated" style="display:none"></p>
 
+      <!-- LOADER OVERLAY -->
+      <div id="home-loader">
+        <div class="home-loader-msg" id="home-loader-msg">Cargando página, un momento...</div>
+        <div class="home-loader-bar-wrap">
+          <div class="home-loader-bar" id="home-loader-bar"></div>
+        </div>
+        <div class="home-loader-hint">El servidor puede tardar unos segundos en despertar</div>
+      </div>
+
+      <!-- CONTENIDO PRINCIPAL (oculto hasta que carga) -->
+      <div id="home-content" style="opacity:0;pointer-events:none">
+
       <!-- JUGADOR DEL DÍA -->
       <div id="pod-home-card" class="pod-home-card" style="display:none">
         <div class="pod-home-label">⭐ Jugador del día</div>
@@ -100,6 +112,8 @@
           <div class="nav-card-arrow">→</div>
         </button>
       </nav>
+
+      </div><!-- /home-content -->
     </div>
   </div>
 
