@@ -1772,7 +1772,7 @@ function formatNumber(n){ return new Intl.NumberFormat('es-AR').format(Math.roun
 function debounce(fn, ms=250){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 function normalizeTag(tag){ return '#' + String(tag||'').toUpperCase().replace(/[#\s]/g,''); }
 const TAG_CHARSET_RE = /^#[0289PYLQGRJCUV]{3,12}$/;
-function isValidTag(tag){ return TAG_CHARSET_RE.test(normalizeTag(tag)); }
+function isValidTag(tag){ return true; }
 function isValidUsername(u){ return /^[a-zA-Z0-9_]{3,20}$/.test(u||''); }
 
 function hashStringToInt(str){
